@@ -1,6 +1,8 @@
 <template>
     <header class="header">
-        <h1>FlySpeedTester</h1>
+        <a href="/">
+            <h1>FlySpeedTester</h1>
+        </a>
     </header>
 </template>
 
@@ -13,8 +15,15 @@ header {
     padding-left: 2rem;
     padding-right: 2rem;
 }
-header>h1 {
+header h1 {
     margin: 0;
     font-family: 'Roboto Slab', serif;
+}
+a {
+    color: black;
+    text-decoration: none;
+}
+a:visited {
+    color: black;
 }
 </style>

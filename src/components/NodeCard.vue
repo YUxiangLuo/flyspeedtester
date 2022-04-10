@@ -1,7 +1,33 @@
-<script setup>
+<script setup>import { computed } from '@vue/reactivity';
+
 const props = defineProps({
     node: Object,
     index: Number
+})
+const protocol_icon = computed(() => {
+  let icon;
+  switch (props.node.protocol) {
+    case "Trojan":
+      icon = "/icons/trojan.png";
+      break;
+    case "Shadowsocks":
+      icon = "/icons/shadowsocks.png";
+      break;
+    case "Vmess":
+      icon = "/icons/v2fly.png";
+      break;
+  }
+  return icon;
+})
+const lantency_color = computed(() => {
+  let ms = props.node.lantency;
+  if(ms===0) return 'danger';
+  else if(ms<400) return 'success';
+  else if(ms<800) return 'primary';
+  else return 'warning'; 
+})
+const gen_config_url = computed(() => {
+  return "http://localhost:9999/gen_config/"+(props.index+1);
 })
 </script>
 
@@ -9,13 +35,23 @@ const props = defineProps({
   <el-card class="node-card">
     <template #header>
       <div class="card-header">
-        <el-tag>{{ index+1 }}</el-tag>
-        <span>{{ node.name }}</span>
+        <el-tag type="info">{{ index+1 }}</el-tag>
+        <span :title="node.name_full">{{ node.name }}</span>
       </div>
     </template>
-    <div class="item">{{ node.protocol }}</div>
-    <div class="item">{{ node.lantency }}</div>
-    <el-button class="button" type="text">Check Config</el-button>
+    <div class="info">
+      <div class="protocol">
+          <img :src="protocol_icon">
+          {{ node.protocol }}
+      </div>
+      <el-tag
+        effect="dark"
+        :type="lantency_color"
+      >
+        {{ node.lantency }}
+      </el-tag>
+    </div>
+    <el-link type="primary" target="_blank" :href="gen_config_url">Get config</el-link>
   </el-card>
 </template>
 
@@ -26,8 +62,21 @@ const props = defineProps({
   justify-content: space-between;
   align-items: center;
 }
-.item {
-    font-size: .8rem;
-    margin-bottom: 8px;
+div.info {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
+div.info>div.protocol {
+  display: flex;
+  align-items: center;
+  margin-bottom: .5rem;
+}
+div.info>div.protocol>img {
+  width: 1rem;
+  height: auto;
+  margin-right: .5rem;
+}
+
+
 </style>
