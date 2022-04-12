@@ -1,4 +1,6 @@
-<script setup>import { computed } from '@vue/reactivity';
+<script setup>
+import { computed } from '@vue/reactivity';
+const { VITE_SERVER, VITE_SERVER_PORT } = import.meta.env;
 
 const props = defineProps({
     node: Object,
@@ -22,12 +24,11 @@ const protocol_icon = computed(() => {
 const lantency_color = computed(() => {
   let ms = props.node.lantency;
   if(ms===0) return 'danger';
-  else if(ms<400) return 'success';
-  else if(ms<800) return 'primary';
+  else if(ms<500) return 'success';
   else return 'warning'; 
 })
 const gen_config_url = computed(() => {
-  return "http://localhost:9999/gen_config/"+(props.index+1);
+  return `http://${VITE_SERVER}:${VITE_SERVER_PORT}/gen_config/`+(props.index+1);
 })
 </script>
 

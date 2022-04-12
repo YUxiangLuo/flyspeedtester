@@ -1,15 +1,14 @@
 <script setup>
 import { onMounted, ref } from 'vue';
-import axios from 'axios';
+import axios from '../axios';
 import { debounce } from 'lodash';
-
 import { useNodesStore } from '../stores/nodes'
+
+const { VITE_WS_PORT, VITE_SERVER } = import.meta.env;
 const nodes = useNodesStore();
-
-
 onMounted(() => {
     // Create WebSocket connection.
-    const socket = new WebSocket('ws://localhost:8888');
+    const socket = new WebSocket(`ws://${VITE_SERVER}:${VITE_WS_PORT}`);
 
     // Connection opened
     socket.addEventListener('open', function (event) {
@@ -42,7 +41,7 @@ const getNodesByAddr = debounce(async () => {
         return;
     }
     isLoading.value = true;
-    let res = await axios.post("http://localhost:9999/get_nodes", {
+    let res = await axios.post("/get_nodes", {
         addr: addr.value 
     });
     isLoading.value = false;
