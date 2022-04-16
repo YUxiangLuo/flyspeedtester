@@ -1,16 +1,22 @@
 <script setup>
     import { computed } from '@vue/reactivity';
     import NodeCard from './NodeCard.vue';
-    import { useNodesStore } from "../stores/nodes";
-    const nodes_store = useNodesStore();
-    const nodes = computed(() => nodes_store.list);
+    import NodeCardLoading from './others/NodeCardLoading.vue';
+    import { useGlobalStore } from "../stores/global";
+    const global_store = useGlobalStore();
+    const nodes = computed(() => global_store.nodes);
+    const nodes_loading = new Array(20);
+    const isLoading = computed(() => global_store.isLoading);
     
 </script>
 
 <template>
     <div class="nodes">
-        <div class="container">
-                <NodeCard v-for="node, index of nodes" :node="node" :index="index" />
+        <div v-if="isLoading" class="container">
+            <NodeCardLoading v-for="node of nodes_loading" />
+        </div>
+        <div v-else class="container">
+            <NodeCard v-for="node, index of nodes" :node="node" :index="index" />
         </div>
     </div>
 </template>
@@ -25,16 +31,14 @@ div.nodes {
     display: flex;
     align-items: flex-start;
     align-content: flex-start;
-    max-width: 1400px;
-    min-height: 800px;
     padding: 1rem;
     flex-wrap: wrap;
 }
 .container>.node-card {
-    flex-basis: 400px;
+    flex-basis: 15rem;
     flex-grow: 0;
     flex-shrink: 1;
-    margin-right: 1rem;
-    margin-bottom: 1rem;
+    margin-right: 2rem;
+    margin-bottom: 2rem;
 }
 </style>

@@ -1,53 +1,51 @@
 <script setup>
-import { onMounted, ref } from 'vue';
-import axios from '../axios';
-import { debounce } from 'lodash';
-import { useNodesStore } from '../stores/nodes'
+import { ref } from 'vue'
+import { debounce } from 'lodash'
+import axios from 'axios'
+import { computed } from '@vue/reactivity';
+import { useGlobalStore } from '../stores/global'
+const global_store = useGlobalStore();
 
-const { VITE_WS_PORT, VITE_SERVER } = import.meta.env;
-const nodes = useNodesStore();
-onMounted(() => {
-    // Create WebSocket connection.
-    const socket = new WebSocket(`ws://${VITE_SERVER}:${VITE_WS_PORT}`);
-
-    // Connection opened
-    socket.addEventListener('open', function (event) {
-        socket.send('reset_lantency');
-    });
-
-    // Listen for messages
-    socket.addEventListener('message', function (event) {
-        console.log('Message from server ', event.data);
-        let lantency_list = JSON.parse(event.data);
-        lantency_list.forEach((ms, index) => {
-            nodes.updateLantency(index, ms);
-        });
-    });
+const { VITE_SERVER, VITE_SERVER_PORT } = import.meta.env;
 
 
 
-})
 
 const addr = ref("");
 const invalid = ref(false);
-const isLoading = ref(false);
+const isLoading = computed(() => global_store.$state.isLoading);
 
 const getNodesByAddr = debounce(async () => {
+    global_store.$patch({ nodes: [] });
     let url;
     try {
         url = new URL(addr.value); 
     } catch (error) {
+        console.log(error);
         invalid.value = true;
         return;
     }
-    isLoading.value = true;
-    let res = await axios.post("/get_nodes", {
-        addr: addr.value 
-    });
-    isLoading.value = false;
-    res = res.data;
-    nodes.$patch({ list: res });
+    global_store.updateIsLoading(true);
+
+    let nodes_data;
+    if(import.meta.env.DEV) {
+        let ares = await axios.post(`http://${VITE_SERVER}:${VITE_SERVER_PORT}/get_nodes`, {
+            addr: addr.value
+        });
+        console.log(ares.data);
+        nodes_data = ares.data;
+    }else {
+        nodes_data = await window.electronAPI.getNodes(addr.value);
+    }
+
+    global_store.updateIsLoading(false);
+    global_store.$patch({ nodes: nodes_data });
 }, 300);
+
+const handleClear = () => {
+    invalid.value = false;
+    addr.value = "";
+}
 
 </script>
 
@@ -55,11 +53,13 @@ const getNodesByAddr = debounce(async () => {
     <div class="address-input">
         <div class="container">
             <div class="line1">
-                <el-input @input="invalid=false" @keyup.enter="getNodesByAddr" class="input" size="large" v-model="addr" placeholder="Please input your clash subsribe address..." clearable />  
-                <el-button @click="getNodesByAddr" type="primary" :loading="isLoading" size="large">Go Testing</el-button>
+                <n-input @input="invalid=false" @keyup.enter="getNodesByAddr" class="input" size="large" v-model:value="addr" placeholder="Please input your clash subsribe address..." clearable />  
+                <n-button @click="getNodesByAddr" type="primary" :loading="isLoading" size="large">Go Testing</n-button>
             </div>
             <div class="line2">
-                <el-alert v-show="invalid" @close="invalid=false, addr=''" class="invalid-tip" title="Invalid address!" type="error" effect="dark"  />
+                <n-alert v-if="invalid" :on-close="handleClear"  class="invalid-tip" title="Invalid address!" type="error" closable>
+                    Invalid address!
+                </n-alert>
             </div>
         </div>
     </div>
@@ -67,38 +67,38 @@ const getNodesByAddr = debounce(async () => {
 
 <style scoped>
 div.address-input {
+    width: 100%;
     display: flex;
     align-items: center;
     justify-content: center;
-    height: 2rem;
-    padding: 1rem;
 }
 .container {
-    flex-basis: 1400px;
+    flex-basis: 50vw;
     flex-grow: 0;
     flex-shrink: 1;
     display: flex;
     flex-direction: column;
-    min-height: 4rem;
+    position: relative;
 }
 .container>.line1 {
     display: flex;
-    margin-bottom: 5px;
+    margin-bottom: .5rem;
+}
+.input {
+    flex-basis: 35vw;
+    flex-grow: 0;
+    flex-shrink: 1;
+    margin-right: .5rem;
 }
 .container>.line2 {
     display: flex;
     justify-content: flex-start;
+    position: absolute;
+    width: 20rem;
+    top: 3rem;
+    left: 0;
 }
 .container>.line2>.invalid-tip {
-    flex-basis: 400px;
-    flex-grow: 0;
-    flex-shrink: 1;
-}
-
-.input {
-    flex-basis: 800px;
-    flex-grow: 0;
-    flex-shrink: 1;
-    margin-right: .5rem;
+    flex: 1;
 }
 </style>

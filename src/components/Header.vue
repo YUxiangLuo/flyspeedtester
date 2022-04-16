@@ -1,7 +1,7 @@
 <template>
     <header class="header">
         <a href="/">
-            <h1>FlySpeedTester</h1>
+            <h1>Fisu!</h1>
         </a>
     </header>
 </template>

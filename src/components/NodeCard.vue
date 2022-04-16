@@ -23,7 +23,7 @@ const protocol_icon = computed(() => {
 })
 const lantency_color = computed(() => {
   let ms = props.node.lantency;
-  if(ms===0) return 'danger';
+  if(ms===0) return 'warning';
   else if(ms<500) return 'success';
   else return 'warning'; 
 })
@@ -33,10 +33,10 @@ const gen_config_url = computed(() => {
 </script>
 
 <template>
-  <el-card class="node-card">
+  <n-card class="node-card">
     <template #header>
       <div class="card-header">
-        <el-tag type="info">{{ index+1 }}</el-tag>
+        <n-tag type="info">{{ index+1 }}</n-tag>
         <span :title="node.name_full">{{ node.name }}</span>
       </div>
     </template>
@@ -45,15 +45,14 @@ const gen_config_url = computed(() => {
           <img :src="protocol_icon">
           {{ node.protocol }}
       </div>
-      <el-tag
-        effect="dark"
+      <n-tag
         :type="lantency_color"
       >
         {{ node.lantency }}
-      </el-tag>
+      </n-tag>
     </div>
-    <el-link type="primary" target="_blank" :href="gen_config_url">Get config</el-link>
-  </el-card>
+    <a target="_blank" :href="gen_config_url">Gen Config</a>
+  </n-card>
 </template>
 
 <style scoped>
